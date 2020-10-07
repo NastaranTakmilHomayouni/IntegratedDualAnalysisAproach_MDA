@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+    svg {
+        font: 10px sans-serif;
+        color: #2b2b2b;
+    }
+
+    .background path {
+        fill: none;
+        stroke: #fff;
+        shape-rendering: crispEdges;
+    }
+
+    .foreground path {
+        fill: none;
+        stroke: #34008B;
+        opacity: 0.15;
+    }
+
+    .brush .extent {
+        fill-opacity: .3;
+        stroke: #fff;
+        shape-rendering: crispEdges;
+    }
+
+    .axis line,
+    .axis path {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    .axis text {
+        text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+        cursor: move;
+    }
+
+    text {
+        color: #2b2b2b;
+    }
+
+</style>
+<body>
+<p>Click on this text to add a new data value to the chart!</p>
+<script src="d3.v5.min.js"></script>
+<script>
+
+    const id_scale_type_band = "band";
+    const id_scale_type_linear = "linear";
+    const id_scale_type_time = "time";
+
+
+    var margin = {top: 30, right: 100, bottom: 70, left: 100},
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+    var //x = d3.scaleOrdinal().rangePoints([0, width], 1),
+        x = d3.scalePoint().range([0, width]);
+    y = {},
+        dragging = {};
+
+    let dimensions;
+
+    var line = d3.line(),
+        axis = d3.axisLeft();
+
+        // background,
+        foreground;
+
+    const qualitative_bar_height = 6;
+    const qualitative_bar_max_width = 50;
+    let qualitative_bar_width_scale = d3.scaleLinear()
+        .domain([0, 1])
+        .range([0, qualitative_bar_max_width]);
+
+    const id_frequency_bar = "frequency_bar";
+    const splitter = "___";
+
+    const duration_time = 500;
+    const opacity_path = 0.15;
+    const opacity_path_hover = 1;
+
+    const id_data_type__categorical = "string";
+    const id_data_type__numerical = "number";
+    const id_data_type__integer = "integer";
+    const id_data_type__date = "date";
+
+
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    let data_all;
+
+
+    d3.csv("GDP.csv").then(function (data) {
+
+        function randomDate(start, end) {
+            return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+        }
+
+
+        data_all = data;
+        let date_col = [];
+        data_all.forEach(function (dat, index) {
+            dat.date_test = randomDate(new Date(2012, 0, 1), new Date());
+            date_col.push(dat.date_test);
+        });
+
+
+        console.log(data_all)
+
+        const array_column = (array, column) => array.map(e => e[column]);
+
+        // transform missing values to undefined values
+        let key_values = d3.keys(data[0]);
+        data.forEach(function (row, index_row) {
+            key_values.forEach(function (key_value) {
+                if (row[key_value] === "") {
+                    row[key_value] = undefined;
+                }
+            })
+        });
+
+        var rowVals = d3.values(data[0]);
+        var data_type_per_dimension = [];
+
+        for (var i = 0; i < key_values.length; i++) {
+            let col = array_column(data, key_values[i]).filter(x => x !== undefined);
+            //var myVar = rowVals[i];
+            data_type_per_dimension.push((array_column(data, key_values[i]).filter(x => x !== undefined).find(x => isNaN(x))) ? id_data_type__categorical : (array_column(data, key_values[i]).filter(x => x !== undefined).find(x => !(x instanceof Date))) ? id_data_type__numerical : id_data_type__date) // get data type
+        }
+
+        // Extract the list of dimensions and create a scale for each.
+        x.domain(dimensions = d3.keys(data[0]).filter(function (d, i) {
+
+
+            // in case of quantitative data
+            if (data_type_per_dimension[i] === id_data_type__numerical) {
+                return y[d] = {
+                    scale_type: id_scale_type_linear,
+                    scale: d3.scaleLinear()
+                        .domain(d3.extent(data, function (p) {
+                            return +p[d]
+                        }))
+                        .range([height, 0])
+                };
+                // in case of date data
+            } else if (data_type_per_dimension[i] === id_data_type__date) {
+
+                return y[d] = {
+                    scale_type: id_scale_type_time,
+                    scale: d3.scaleTime()
+                        .domain(d3.extent(date_col))
+                        .range([height, 0])
+                };
+                // in case of qualitative data
+            }else {
+
+                // compute frequencies
+                let frequencies = {};
+                for (var i = 0; i < array_column(data, d).filter(x => x !== undefined).length; ++i) {
+                    if (!frequencies[array_column(data, d).filter(x => x !== undefined)[i]]) {
+                        frequencies[array_column(data, d).filter(x => x !== undefined)[i]] = {};
+                        frequencies[array_column(data, d).filter(x => x !== undefined)[i]]['absolute_count'] = 0;
+                    }
+                    ++frequencies[array_column(data, d).filter(x => x !== undefined)[i]]['absolute_count'];
+                }
+
+
+                let frequency_keys = d3.keys(frequencies);
+
+                frequency_keys.forEach(function (value, index) {
+                    frequencies[value]['freq'] = frequencies[value]['absolute_count'] / data.length;
+                });
+
+                // add scale for qualitative data
+                return y[d] = {
+                    scale_type: id_scale_type_band,
+                    scale: d3.scaleBand()
+                        .padding(0.1)
+                        .domain(array_column(data, d).filter(x => x !== undefined))
+                        .range([0, height]),
+                    frequencies: frequencies
+                };
+            }
+        }));
+
+        let dimensions_all = JSON.parse(JSON.stringify(dimensions));
+        dimensions = ["Agriculture", "Agriculture_and_Allied", "Industry", "Mining", "Manufacturing", "Services"];
+
+        x.domain(dimensions);
+
+        // Add blue foreground lines for focus.
+        foreground = svg.append("g")
+            .attr("class", "foreground")
+            .selectAll("path")
+            .data(data)
+            .enter()
+            .append("path")
+            .attr("d", path)
+            .on("mouseover", function (d) {
+                d3.select(this).style("opacity", opacity_path_hover)
+            })
+            .on("mouseout", function () {
+                d3.select(this).style("opacity", opacity_path)
+            });
+
+        let g;
+
+        //add_single_dimensions(dimensions)
+        add_dimensions(dimensions);
+
+
+        function add_dimensions(dimensions) {
+
+
+            g = svg.selectAll(".dimension")
+                .data(dimensions)
+                .enter().append("g")
+                .attr("class", id_class_dimension)
+                .attr('id', function (d) {
+                    return d;
+                })
+                .attr("transform", function (d) {
+                    console.log('heare')
+                    return "translate(" + x(d) + ")";
+                })
+                .each(function (d) {
+                    d = this.id;
+                    d3.select(this).call(d.drag = d3.drag()
+                        .subject(function (d) {
+                            d = this.id;
+                            return {x: x(d)};
+                        })
+                        .on("start", function (d) {
+                            d = this.id;
+                            dragging[d] = x(d);
+                            //background.attr("visibility", "hidden");
+                        })
+                        .on("drag", function (d) {
+
+                            d = this.id;
+
+                            dragging[d] = Math.min(width, Math.max(0, d3.event.x));
+                            foreground.attr("d", path);
+                            dimensions.sort(function (a, b) {
+                                return position(a) - position(b);
+                            });
+                            x.domain(dimensions);
+            /*                d3.selectAll('.dimension').attr("transform", function (d) {
+                            //d3.select(this).attr("transform", function (d) {
+                            //g.attr("transform", function (d) {
+                                    return "translate(" + position(d) + ")";
+                                })*/
+                            d3.selectAll('.dimension').each(function (d) {
+                                d3.select('#' + d).attr("transform", "translate(" + position(d) + ")");
+                            })
+                        })
+                        .on("end", function (d) {
+                            d = this.id;
+                            delete dragging[d];
+
+                            transition(d3.select(this)).attr("transform", "translate(" + x(d) + ")");
+                            transition(foreground).attr("d", path);
+                            // background
+                            //     .attr("d", path)
+                            //     .transition()
+                            //     .delay(500)
+                            //     .duration(0)
+                            //     .attr("visibility", null);
+                        }));
+                });
+
+            // Add an axis and title.
+            g.append("g")
+                .attr("class", "axis")
+                .each(function (d) {
+                    d3.select(this).call(axis.scale(y[d].scale));
+
+                    if (y[d].scale_type === id_scale_type_band) {
+
+                        let axis_svg = d3.select(this);
+
+                        let frequency_keys = d3.keys(y[d].frequencies);
+
+                        frequency_keys.forEach(function (value, index) {
+                            axis_svg.append("rect")
+                                .attr('id', d + splitter + value + splitter + id_frequency_bar)
+                                .attr('class', id_frequency_bar)
+                                .attr("x", 0)
+                                .attr('y', get_y_value_for_axes(value, d) - qualitative_bar_height / 2)
+                                .style('height', qualitative_bar_height)
+                                .style("width", qualitative_bar_width_scale(y[d].frequencies[value]['freq']))
+                                .style('fill', 'red')
+                                .style('opacity', 0.3)
+                                .on("mouseover", function (d) {
+                                    d3.select(this).style("opacity", opacity_path_hover)
+                                    console.log(y[d].frequencies[value]);
+
+                                })
+                                .on("mouseout", function () {
+                                    d3.select(this).style("opacity", opacity_path)
+                                });
+                        })
+                    }
+                })
+                .append("text")
+                .style("text-anchor", "middle")
+                .attr("y", -9)
+                .style('fill', 'black')
+                .text(function (d) {
+                    if (d.length > 30) {
+                        return d.substring(0, 30) + "......";
+                    } else return d;
+                });
+
+            // Add and store a brush for each axis.
+            g.append("g")
+                .attr("class", "brush")
+                .each(function (d) {
+                    d3.select(this).call(
+                        d.brush = d3.brushY()
+                        .extent([[-10, 0], [0, height]]) // only until 0 to still provide hovering for qualitative data frequencies
+                        .on("start", brushstart)
+                        .on("brush", brush)
+                        .on("end", brush)
+                    )
+                })
+                .selectAll("rect")
+                .attr("x", -8)
+                .attr("width", 8); // allow brushing only on the left side of the axis to still provide hovering for qualitative data frequencies
+
+        }
+
+
+        setTimeout(function () {
+
+            console.log(dimensions)
+
+            dimensions = ["name", "Agriculture", "Agriculture_and_Allied", "Industry", "Mining", "Manufacturing", "Services"];
+
+            x.domain(dimensions);
+
+
+            foreground.transition()              //Initiate a transition on all elements in the update selection (all rects)
+                .duration(duration_time)
+                .attr("d", path);
+
+
+            g.transition()              //Initiate a transition on all elements in the update selection (all rects)
+                .duration(duration_time)
+                .attr("transform", function (d) {
+                    console.log('hearefdasf')
+
+                    return "translate(" + position(d) + ")";
+                })
+                .on('end', function (d) {
+
+                    if (x(d) === undefined) {
+                        this.remove();
+                    }
+
+                });
+
+            setTimeout(function () {
+                dimensions.push(dimensions.shift());
+                add_dimensions(dimensions);
+
+            }, duration_time + 30);
+            //d3.select('#Industry').select(".brush").call(d3.brushY().move, [110, 200])
+            //brush();
+
+                 //call(
+               // d3.brushSelection([100, 200])); // only until 0 to still provide hovering for qualitative data frequencies
+
+            // pop and add is not working at the same time!
+
+
+            // test deleting an axis
+            /*dimensions.pop();
+
+            // test reordering axis
+            dimensions.sort();
+
+
+            x.domain(dimensions);
+
+
+            foreground.transition()              //Initiate a transition on all elements in the update selection (all rects)
+                .duration(duration_time)
+                .attr("d", path);
+
+
+            g.transition()              //Initiate a transition on all elements in the update selection (all rects)
+                .duration(duration_time)
+                .attr("transform", function (d) {
+                    console.log('hearefdasf')
+
+                    return "translate(" + position(d) + ")";
+                })
+                .on('end', function (d) {
+
+                    if (x(d) === undefined) {
+                        this.remove();
+                    }
+
+                });
+
+            setTimeout(function () {
+                add_dimensions(dimensions);
+
+            }, duration_time + 10);*/
+
+        }, 1000);
+
+    });
+
+
+    function position(d) {
+        let v = dragging[d];
+
+        if (x(d) === undefined) {
+            return -10;
+        }
+
+        return v == null ? x(d) : v;
+    }
+
+    function transition(g) {
+        return g.transition().duration(duration_time);
+    }
+
+    function get_y_value_for_axes(value, dimension) {
+        if (value === undefined) { // in case the value is undefined, draw it underneath
+            return height + 50;
+        } else if (y[dimension].scale_type === id_scale_type_band) { // in case of qualitative data
+            return y[dimension].scale(value) + 1 / 2 * y[dimension].scale.bandwidth();
+        } else { // in case of quantitative values
+            return y[dimension].scale(value);
+        }
+    }
+
+    // Returns the path for a given data point.
+    function path(value) {
+        return line(dimensions.map(function (dimension) {
+            return [position(dimension), get_y_value_for_axes(value[dimension], dimension)];
+        }));
+
+    }
+
+
+    function brushstart() {
+        d3.event.sourceEvent.stopPropagation();
+    }
+
+    // Handles a brush event, toggling the display of foreground lines.
+    function brush() {
+
+        var actives = [];
+        svg.selectAll(".brush")
+            .filter(function (d) {
+                return d3.brushSelection(this);
+            })
+            .each(function (d) {
+
+                actives.push({
+                    dimension: d,
+                    extent: d3.brushSelection(this),
+                    //values: [y[d].invert(d3.brushSelection(this)[1]), y[d].invert(d3.brushSelection(this)[0])]
+                });
+            });
+
+        let active_patients = [];
+        foreground.style("display", function (d) {
+            active_patients.push(d);
+            return actives.every(function (active) {
+
+                let is_active = (active.extent[0] <= get_y_value_for_axes(d[active.dimension], active.dimension) && get_y_value_for_axes(d[active.dimension], active.dimension) <= active.extent[1]);
+
+                if (!is_active) {
+                    active_patients.pop();
+                }
+
+                return is_active;
+
+                //return active.extent[0] <= get_y_value_for_axes(d[active.dimension], active.dimension) && get_y_value_for_axes(d[active.dimension], active.dimension) <= active.extent[1];
+            }) ? null : "none";
+        });
+
+        d3.selectAll('.' + id_frequency_bar).each(function (frequency_bar) {
+
+            let patients_having_value = active_patients.filter(x => x[frequency_bar] === d3.select(this).attr('id').split(splitter)[1]).length;
+
+            d3.select(this)
+                .style("width", qualitative_bar_width_scale(patients_having_value / data_all.length));
+        })
+    }
+
+
+    d3.select("p")
+        .on("click", function () {
+
+
+        })
+</script>
