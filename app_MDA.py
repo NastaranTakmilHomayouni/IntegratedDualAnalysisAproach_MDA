@@ -21,10 +21,9 @@ id_data_type__categorical = "string"
 id_data_type__numerical = "number"
 id_data_type__date = "date"
 
-
 # merged_all = get_data_from_server.get_dataframe_from_server()
 
-# csv_file_name_missing_values = 'clinical_data_whole.csv'
+# csv_file_name_missing_values = 'clinical_data_imputed.csv'
 # merged_all.to_csv(csv_file_name_missing_values, index=False)
 
 # missingness = merged_all.isnull().astype(int).sum()
@@ -42,12 +41,32 @@ id_data_type__date = "date"
 # synthetic
 merged_all = pd.read_csv("resources/synthetic_dates_missingness2.csv", keep_default_na=False, na_values=[""])
 
+#merged_all = pd.read_csv("resources/clinical_data_imputed.csv", keep_default_na=False, na_values=[""])
+
+
 merged_all = merged_all.loc[:, ~merged_all.columns.duplicated()]  # remove duplicate rows
 
 gv.initial_length_of_data_rows = len(merged_all)
 
 # get all data types
 dataTypeSeries = merged_all.dtypes
+
+# remove_randomized_values = False
+#
+# def remove_randomized_values():
+#
+#     for col in merged_all.columns:
+#
+#         rand_percentage = numpy.random.randint(0, 20)
+#         rand_percentage_data_rows = int(rand_percentage * 0.01 * len(merged_all))
+#         randomized_indexes = numpy.random.randint(0, len(merged_all), size=rand_percentage_data_rows)
+#
+#         for rand_index in randomized_indexes:
+#             merged_all[col][rand_index] = None
+#
+#
+# if remove_randomized_values:
+#     remove_randomized_values()
 
 
 def is_number(s):
@@ -186,6 +205,7 @@ def get_data_initially_formatted(index):
                 date_in_milisec = current_col_parallel[i]
 
                 try:
+                    #print(str(number))
                     date_in_milisec = datetime.strptime(str(number), "%d.%m.%Y").timestamp() * 1000
                     this_data_type_parallel = id_data_type__date
 
@@ -237,6 +257,15 @@ print("--- %s seconds ---" % (time.time() - start_time))
 def main_interface():
 
     gv.request_data_list = []
+
+    return transform([gv.data_initially_formatted, gv.data_initially_formatted_no_missing_values])
+
+
+@app.route('/update_thresholds/', methods=["POST"])
+def update_thresholds():
+
+    request_thresholds = request.get_json()
+    print(request_thresholds)
 
     return transform([gv.data_initially_formatted, gv.data_initially_formatted_no_missing_values])
 

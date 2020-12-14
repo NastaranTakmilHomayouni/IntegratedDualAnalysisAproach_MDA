@@ -55,6 +55,8 @@ function initialize_dimensions_plots() {
             //initialize_run_famd_pop_up_view(dimension_plot_preferences[i].id);
         }
 
+        initialize_axis_changing_button(dimension_plot_preferences[i].id, id_axis_changing_button, 2, "resources/settings.png", id_settings, i, dimension_plot_preferences[i].all_descriptive_statistical_measures);
+
         initialize_axis_changing_button(dimension_plot_preferences[i].id, id_axis_changing_button, 4, "resources/change_y_axis.png", id_scatterplot_y_axis, i, dimension_plot_preferences[i].all_descriptive_statistical_measures);
         initialize_axis_changing_button(dimension_plot_preferences[i].id, id_axis_changing_button, 5, "resources/change_x_axis.png", id_scatterplot_x_axis, i, dimension_plot_preferences[i].all_descriptive_statistical_measures);
 
@@ -160,6 +162,25 @@ function initialize_axis_changing_button(parent_div_id, button_id, index_button,
             }
 
             d3.select(this).select('circle').style('fill', fill_color);
+        } else if (axis_id === id_settings) {
+            d3.select('#settings_div').style('visibility', 'visible');
+
+            let slider_coefficient_unalikeability = document.getElementById("coeff_unalikeability_threshold");
+            let slider_coefficient_unalikeability_output = document.getElementById("coeff_unalikeability_value");
+            slider_coefficient_unalikeability_output.innerHTML = slider_coefficient_unalikeability.value + '%';
+
+            slider_coefficient_unalikeability.oninput = function() {
+                slider_coefficient_unalikeability_output.innerHTML = this.value + '%';
+            }
+
+            let slider_modality = document.getElementById("modality_threshold");
+            let slider_modality_output = document.getElementById("modality_value");
+            slider_modality_output.innerHTML = slider_modality.value + '%';
+
+            slider_modality.oninput = function() {
+                slider_modality_output.innerHTML = this.value + '%';
+            }
+
         } else {
             let index_descriptive_measure = all_descriptive_statistic_measures.indexOf(dimension_plot_preferences[index_dimension_plot_preferences][axis_id].split(deviation_ending)[0]) + 1;
 
@@ -951,4 +972,10 @@ function add_context_menu() {
         context_menu_instance.show();
     });
 
+}
+
+function submit_thresholds() {
+    d3.select('#submit_threshold').style('visibility', 'hidden');
+
+    // ToDo update backend and frontend
 }

@@ -93,7 +93,7 @@ def get_categories(column_values):
 
 
 def compute_coefficient_of_unalikeability(column_values_coeff_unalikeability, data_type, column_id):
-    epsilon_percent_for_coefficient_of_unalikeability = 5
+    epsilon_percent_for_coefficient_of_unalikeability = gv.coefficient_of_unalikeability_threshold
 
     sum_unalike = 0
 
@@ -169,7 +169,7 @@ def get_number_of_modes(current_col, data_type, column_id):
 
     elif data_type == id_data_type__categorical:
 
-        threshold = 0.10
+        threshold = gv.modes_threshold
 
         relative_frequencies = [number / gv.initial_length_of_data_rows for number in
                                 list(collections.Counter(cleaned_list).values())]

@@ -132,6 +132,7 @@ var language_string = [
     {id: id_scatterplot_x_axis, eng: "Change x axis measure", de: "Ändere die x-Achsen Maßeinheit"},
     {id: id_scatterplot_y_axis, eng: "Change y axis measure", de: "Ändere die y-Achsen Maßeinheit"},
     {id: id_missing_values_integration, eng: "Include or exclude missing values in correlation analysis", de: "Inkludiere oder exkludiere Fehlwerte in der Korrelationsanalyse"},
+    {id: id_settings, eng: "Settings", de: "Einstellungen"},
 
     //{id: id_applied_data_cleansing_button, eng: "automatically identify best suitable data type and convert", de: "Automatisches Erkennen und Konvertieren zum als best passensten Datentyp."},
     {id: id_outlier_removing_button, eng: "automatically remove possible outliers", de: "Automatisches Entfernen von möglichen Ausreißern."},

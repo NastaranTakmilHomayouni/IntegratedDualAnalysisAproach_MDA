@@ -63,6 +63,7 @@ const id_radarChartDiv_class = "radarChartDiv";
 const id_scatterplot_y_axis = "scatterplot_y_axis";
 const id_scatterplot_x_axis = "scatterplot_x_axis";
 const id_missing_values_integration = "missing_values_integration";
+const id_settings = "id_settings";
 
 const id_unalikeability_view_class = "unalikeability_view_class";
 const id_id_unalikeability_view = "id_id_unalikeability_view";
