@@ -1,6 +1,5 @@
 function add_dimensions() {
 
-    console.log(dimensions)
     // use forEach instead of .data().enter() because updating data is not working. I'm too stupid probably. haha
     dimensions.forEach(function (dim) {
 

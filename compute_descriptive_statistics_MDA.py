@@ -86,7 +86,7 @@ def get_categories(column_values):
 
         if str(count_el) != 'nan':
             categories_list.append(
-                CategoriesObject(str(count_el), counter_elements[count_el] / gv.initial_length_of_data_rows,
+                CategoriesObject(str(count_el), (counter_elements[count_el] / len(column_values)),
                                  counter_elements[count_el]))
 
     return categories_list

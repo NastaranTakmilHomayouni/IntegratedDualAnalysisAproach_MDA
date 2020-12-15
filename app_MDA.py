@@ -6,6 +6,8 @@ import jsonpickle
 import numpy
 import pandas as pd
 from flask import Flask, request, jsonify
+from joblib import Parallel, delayed
+import multiprocessing
 
 import compute_descriptive_statistics_MDA as cds
 import global_variables as gv
@@ -14,7 +16,6 @@ try:
 except ImportError:
     pass;
 from collections import namedtuple
-from json import JSONEncoder
 
 start_time = time.time()
 
@@ -42,9 +43,9 @@ id_data_type__date = "date"
 # merged_all = pd.read_csv("resources/Repro_FastSurfer_run-01_cleaned.csv", keep_default_na=False, na_values=[""])
 
 # synthetic
-merged_all = pd.read_csv("resources/synthetic_dates_missingness2.csv", keep_default_na=False, na_values=[""])
+# merged_all = pd.read_csv("resources/synthetic_dates_missingness2.csv", keep_default_na=False, na_values=[""])
 
-#merged_all = pd.read_csv("resources/clinical_data_imputed.csv", keep_default_na=False, na_values=[""])
+merged_all = pd.read_csv("resources/clinical_data_imputed.csv", keep_default_na=False, na_values=[""])
 
 
 merged_all = merged_all.loc[:, ~merged_all.columns.duplicated()]  # remove duplicate rows
@@ -246,10 +247,17 @@ def get_data_initially_formatted(index):
     return col_description
 
 
-gv.data_initially_formatted = [get_data_initially_formatted(i) for i in merged_all.columns]
+#[sqrt(i ** 2) for i in range(10)]
+#Parallel(n_jobs=2)(delayed(sqrt)(i ** 2) for i in range(10))
+# gv.data_initially_formatted = [get_data_initially_formatted(i) for i in merged_all.columns]
+num_cores = multiprocessing.cpu_count()
+
+gv.data_initially_formatted = Parallel(n_jobs=num_cores)(delayed(get_data_initially_formatted)(i) for i in merged_all.columns)
 
 gv.include_missing_values = False
-gv.data_initially_formatted_no_missing_values = [get_data_initially_formatted(i) for i in merged_all.columns]
+gv.data_initially_formatted_no_missing_values = Parallel(n_jobs=num_cores)(delayed(get_data_initially_formatted)(i) for i in merged_all.columns)
+
+#gv.data_initially_formatted_no_missing_values = [get_data_initially_formatted(i) for i in merged_all.columns]
 
 gv.include_missing_values = True
 
@@ -306,6 +314,27 @@ def compute_deviations_and_get_current_values():
 
     return comp_deviations(request_data_list)
 
+def comp_deviation_in_loop (data_initial, request_data_list, data_to_use):
+    new_values = list([data_initial.column_values[item_index] for
+                       item_index in range(len(data_initial.column_values)) if item_index in request_data_list])
+
+    new_values_normalized = list([data_initial.descriptive_statistics.normalized_values[
+                                      item_index] for
+                                  item_index in range(len(data_initial.column_values)) if item_index in request_data_list])
+
+    col_descriptive_statistics_new = DescriptiveStatisticsClass(new_values_normalized, data_initial.data_type,
+                                                                data_initial.id)
+    col_descriptive_statistics_new = cds.get_descriptive_statistics_deviations(col_descriptive_statistics_new,
+                                                                               [x for x in
+                                                                                data_to_use if
+                                                                                x.id == data_initial.id][
+                                                                                   0].descriptive_statistics)
+
+    col_description_new = ColumnElementsClass(data_initial.header, data_initial.id,
+                                              data_initial.data_type, new_values, col_descriptive_statistics_new)
+
+    return col_description_new
+
 
 def comp_deviations(request_data_list):
     start_time_deviations = time.time()
@@ -317,26 +346,7 @@ def comp_deviations(request_data_list):
     if not gv.include_missing_values:
         data_to_use = gv.data_initially_formatted_no_missing_values
 
-    for data_initial in data_to_use:
-        new_values = list([data_initial.column_values[item_index] for
-                           item_index in range(len(data_initial.column_values)) if item_index in request_data_list])
-
-        new_values_normalized = list([data_initial.descriptive_statistics.normalized_values[
-                                          item_index] for
-                                      item_index in range(len(data_initial.column_values)) if item_index in request_data_list])
-
-        col_descriptive_statistics_new = DescriptiveStatisticsClass(new_values_normalized, data_initial.data_type,
-                                                                    data_initial.id)
-        col_descriptive_statistics_new = cds.get_descriptive_statistics_deviations(col_descriptive_statistics_new,
-                                                                                   [x for x in
-                                                                                    data_to_use if
-                                                                                    x.id == data_initial.id][
-                                                                                       0].descriptive_statistics)
-
-        col_description_new = ColumnElementsClass(data_initial.header, data_initial.id,
-                                                  data_initial.data_type, new_values, col_descriptive_statistics_new)
-
-        data_initially_formatted_new.append(col_description_new)
+    data_initially_formatted_new = Parallel(n_jobs=num_cores)(delayed(comp_deviation_in_loop)(data_initial, request_data_list, data_to_use) for data_initial in data_to_use)
 
     print("--- %s seconds ---" % (time.time() - start_time_deviations))
 

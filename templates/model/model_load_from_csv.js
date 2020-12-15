@@ -56,6 +56,8 @@ function load_csv(callback) {
 
         d3.selectAll('#' + id_view).style('pointer-events', 'auto');
 
+        console.log(column_values_filtered);
+
         callback(true)
     });
 }
