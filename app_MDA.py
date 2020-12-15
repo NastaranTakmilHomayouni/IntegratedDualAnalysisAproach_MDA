@@ -1,3 +1,4 @@
+import json
 import time
 from datetime import datetime
 
@@ -12,6 +13,8 @@ try:
     import get_data_from_server
 except ImportError:
     pass;
+from collections import namedtuple
+from json import JSONEncoder
 
 start_time = time.time()
 
@@ -261,13 +264,29 @@ def main_interface():
     return transform([gv.data_initially_formatted, gv.data_initially_formatted_no_missing_values])
 
 
+def customStudentDecoder(studentDict):
+    return namedtuple('X', studentDict.keys())(*studentDict.values())
+
+
 @app.route('/update_thresholds/', methods=["POST"])
 def update_thresholds():
 
     request_thresholds = request.get_json()
-    print(request_thresholds)
 
-    return transform([gv.data_initially_formatted, gv.data_initially_formatted_no_missing_values])
+    gv.coefficient_of_unalikeability_threshold = request_thresholds[0]
+    gv.modes_threshold = request_thresholds[1]
+
+    filtered_values = list(request_thresholds[2])
+
+    gv.data_initially_formatted = [cds.update_coeff_unalikeability_modes(i) for i in gv.data_initially_formatted]
+    gv.data_initially_formatted_no_missing_values = [cds.update_coeff_unalikeability_modes(i) for i in
+                                                     gv.data_initially_formatted_no_missing_values]
+
+    filtered_values = [cds.update_coeff_unalikeability_modes_dict(i) for i in filtered_values]
+
+    filtered_values = [cds.update_coeff_unalikealibiity_modes_deviations(i) for i in filtered_values]
+
+    return transform([gv.data_initially_formatted, gv.data_initially_formatted_no_missing_values, filtered_values])
 
 
 @app.route('/toggle_include_missing_values/', methods=["POST"])

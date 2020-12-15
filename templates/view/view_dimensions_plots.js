@@ -672,7 +672,6 @@ function update_dimension_scatterplot(parent_div_id, dimension_plot_pref, possib
         rotateCarousel(true);
 
     }));
-    console.log(possible_correlations_bool)
     // Update circles
     svg.selectAll("circle")
         .data(column_values_filtered.filter(x => x.PCone_or_two !== id_PC2))  // Update with new data
@@ -975,7 +974,18 @@ function add_context_menu() {
 }
 
 function submit_thresholds() {
-    d3.select('#submit_threshold').style('visibility', 'hidden');
 
-    // ToDo update backend and frontend
+    d3.select('#settings_div').style('visibility', 'hidden');
+
+    let slider_coefficient_unalikeability_output = 0.01 * document.getElementById("coeff_unalikeability_value").innerHTML.split('%')[0];
+    let slider_modality_output = 0.01* document.getElementById("modality_value").innerHTML.split('%')[0];
+
+    console.log(column_values_grouped)
+    update_thresholds_model(function (response) {
+
+        update_after_filtering();
+//        selectedIndex = column_values_grouped.map(col => col[key_id]).indexOf(col_id) - dist;
+        rotateCarousel(true)//update_pcp_plot(update_dimensions_order_regarding_Filters());
+
+    }, slider_coefficient_unalikeability_output, slider_modality_output);
 }
