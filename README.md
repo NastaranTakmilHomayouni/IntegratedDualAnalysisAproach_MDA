@@ -1,11 +1,10 @@
-# IntegratedDualAnalysisAproach_MDA
+# Integrated Dual Analysis of Quantitative and Qualitative High-Dimensional Data
+This Javascript / Python project is the authors impelementation of the article **Integrated Dual Analysis of Quantitative and Qualitative High-Dimensional Data**
 
-This project includes an integrated dual analysis approach for high-dimensional quantitative and qualitative data. 
-The original idea is based on the dual analysis approach developed by Turkay et al. [1]. By treating both, dimensions and items, 
-as first order objects, users can obtain an overview about the data and identify possible correlations by investigating changes 
-among descriptive statistics after subset selection.  
+## Authors
+Juliane Müller, Laura Garrison, Philipp Ulbrich, Stefanie Schreiber, Stefan Bruckner, Helwig Hauser, Steffen Oeltze-Jafra
 
-[1] &nbsp; C. Turkay, P. Filzmoser, and H. Hauser, “Brushing Dimensions - A Dual Visual Analysis Model for High-Dimensional Data, ”IEEE Transactionson Visualization and Computer Graphics, vol. 17, no. 12, pp. 2591–2599,2011.
+TVCG 2021
 
 ## Abstract
 The Dual Analysis framework is a powerful enabling technology for the exploration of high dimensional quantitative data by treating data dimensions as first-class objects that can be explored in tandem with data values. In this work, we extend the Dual Analysis framework through the ***joint*** treatment of quantitative (numerical) and qualitative (categorical) dimensions. 
