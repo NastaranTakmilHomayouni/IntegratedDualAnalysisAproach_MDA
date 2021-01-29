@@ -7,6 +7,10 @@ among descriptive statistics after subset selection.
 
 [1] &nbsp; C. Turkay, P. Filzmoser, and H. Hauser, “Brushing Dimensions - A Dual Visual Analysis Model for High-Dimensional Data, ”IEEE Transactionson Visualization and Computer Graphics, vol. 17, no. 12, pp. 2591–2599,2011.
 
+## Abstract
+The Dual Analysis framework is a powerful enabling technology for the exploration of high dimensional quantitative data by treating data dimensions as first-class objects that can be explored in tandem with data values. In this work, we extend the Dual Analysis framework through the ***joint*** treatment of quantitative (numerical) and qualitative (categorical) dimensions. 
+Computing common measures for all dimensions allows us to visualize both quantitative and qualitative dimensions in the same view. \revision{This enables} a natural ***joint*** treatment of mixed data during interactive visual exploration and analysis. Several measures of variation for nominal qualitative data can also be applied to ordinal qualitative and quantitative data. For example, instead of measuring variability from a mean or median, \revision{other} measures assess inter-data variation or average variation from a mode. In this work, we demonstrate how these measures can be integrated into the Dual Analysis framework to explore and generate hypotheses about high-dimensional mixed data. A medical case study using clinical routine data of patients suffering from Cerebral Small Vessel Disease~(CSVD), conducted with a senior neurologist and a medical student, shows that a joint Dual Analysis approach for quantitative and qualitative data can rapidly lead to new insights based on which new hypotheses may be generated. 
+
 ## How to run it
 - download repository from github
 - open project in development environment, such as IntelliJ idea
