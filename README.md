@@ -9,7 +9,7 @@ This Javascript / Python project is the authors impelementation of the article *
 <sup>3</sup>Dept. of Neurology, Otto von Guericke University Magdeburg, Germany\
 <sup>4</sup>Center for Behavioral Brain Sciences, Otto von Guericke University Magdeburg, Germany
 
-TVCG 2021
+accepted for TVCG 2021
 
 ## Abstract
 The Dual Analysis framework is a powerful enabling technology for the exploration of high dimensional quantitative data by treating data dimensions as first-class objects that can be explored in tandem with data values. In this work, we extend the Dual Analysis framework through the ***joint*** treatment of quantitative (numerical) and qualitative (categorical) dimensions. 
