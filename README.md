@@ -2,7 +2,7 @@
 This Javascript / Python project is the authors impelementation of the article **Integrated Dual Analysis of Quantitative and Qualitative High-Dimensional Data**
 
 ## Authors
-Juliane Müller<sup>1</sup>, Laura Garrison<sup>2</sup>, Philipp Ulbrich<sup>3,4</sup>, Stefanie Schreiber<sup>3,4</sup>, Stefan Bruckner<sup>2</sup>, Helwig Hauser<sup>2</sup>, Steffen Oeltze-Jafra<sup>1,4</sup>
+***Juliane Müller<sup>1</sup>, Laura Garrison<sup>2</sup>, Philipp Ulbrich<sup>3,4</sup>, Stefanie Schreiber<sup>3,4</sup>, Stefan Bruckner<sup>2</sup>, Helwig Hauser<sup>2</sup>, Steffen Oeltze-Jafra<sup>1,4</sup>***
 
 <sup>1</sup>Dept. of Neurology, Otto von Guericke University Magdeburg, Germany \
 <sup>2</sup>Dept. of Informatics \& Mohn Medical Imaging and Visualization Centre, Dept. of Radiology, Haukeland Univ. Hospital, University of Bergen, Norway \
