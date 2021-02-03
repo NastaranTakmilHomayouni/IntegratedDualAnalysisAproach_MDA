@@ -1,5 +1,5 @@
 # Integrated Dual Analysis of Quantitative and Qualitative High-Dimensional Data
-This Javascript / Python project is the authors implementation of the article **Integrated Dual Analysis of Quantitative and Qualitative High-Dimensional Data**.
+This Javascript / Python project is the authors implementation of the article **[Integrated Dual Analysis of Quantitative and Qualitative High-Dimensional Data](https://github.com/JulianeMu/IntegratedDualAnalysisAproach_MDA/blob/master/paper/TVCG2020_IntegratedDualAnalysisOfQuanitativeAndQualitativeHigh_DimensionalData.pdf)**.
 
 ## Authors
 ***Juliane Müller<sup>1</sup>, Laura Garrison<sup>2</sup>, Philipp Ulbrich<sup>3,4</sup>, Stefanie Schreiber<sup>3,4</sup>, Stefan Bruckner<sup>2</sup>, Helwig Hauser<sup>2</sup>, Steffen Oeltze-Jafra<sup>1,4</sup>***
