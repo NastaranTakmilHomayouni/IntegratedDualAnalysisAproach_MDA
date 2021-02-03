@@ -3,6 +3,8 @@ import time
 from datetime import datetime
 
 import jsonpickle
+import sys
+import os
 import numpy
 import pandas as pd
 from flask import Flask, request, jsonify
@@ -25,27 +27,11 @@ id_data_type__categorical = "string"
 id_data_type__numerical = "number"
 id_data_type__date = "date"
 
-# merged_all = get_data_from_server.get_dataframe_from_server()
-
-# csv_file_name_missing_values = 'clinical_data_imputed.csv'
-# merged_all.to_csv(csv_file_name_missing_values, index=False)
-
-# missingness = merged_all.isnull().astype(int).sum()
-# print(missingness)
-# header = merged_all.head()
-# abc = merged_all.head()
-# abc['missing count'] = missingness
-# csv_file_name_missing_values = 'clinical_data_missingness.csv'
-# missingness.to_csv(csv_file_name_missing_values, index=False)
-
-
-# FALK
-# merged_all = pd.read_csv("resources/Repro_FastSurfer_run-01_cleaned.csv", keep_default_na=False, na_values=[""])
+#merged_all = get_data_from_server.get_dataframe_from_server()
 
 # synthetic
-# merged_all = pd.read_csv("resources/synthetic_dates_missingness2.csv", keep_default_na=False, na_values=[""])
-
-merged_all = pd.read_csv("resources/clinical_data_imputed.csv", keep_default_na=False, na_values=[""])
+merged_all = pd.read_csv(os.path.dirname(sys.argv[0]) + os.path.sep + "resources" + os.path.sep +
+                         "synthetic_dates_missingness2.csv", keep_default_na=False, na_values=[""])
 
 
 merged_all = merged_all.loc[:, ~merged_all.columns.duplicated()]  # remove duplicate rows
@@ -54,23 +40,6 @@ gv.initial_length_of_data_rows = len(merged_all)
 
 # get all data types
 dataTypeSeries = merged_all.dtypes
-
-# remove_randomized_values = False
-#
-# def remove_randomized_values():
-#
-#     for col in merged_all.columns:
-#
-#         rand_percentage = numpy.random.randint(0, 20)
-#         rand_percentage_data_rows = int(rand_percentage * 0.01 * len(merged_all))
-#         randomized_indexes = numpy.random.randint(0, len(merged_all), size=rand_percentage_data_rows)
-#
-#         for rand_index in randomized_indexes:
-#             merged_all[col][rand_index] = None
-#
-#
-# if remove_randomized_values:
-#     remove_randomized_values()
 
 
 def is_number(s):
@@ -313,6 +282,7 @@ def compute_deviations_and_get_current_values():
     request_data_list = request.get_json()
 
     return comp_deviations(request_data_list)
+
 
 def comp_deviation_in_loop (data_initial, request_data_list, data_to_use):
     new_values = list([data_initial.column_values[item_index] for

@@ -114,7 +114,8 @@ def compute_coefficient_of_unalikeability(column_values_coeff_unalikeability, da
         min_value = 0  # numpy.amin(original_column_values)
         max_value = 1  # numpy.amax(original_column_values)
 
-        epsilon = (max_value - min_value) / 100 * epsilon_percent_for_coefficient_of_unalikeability
+        epsilon = epsilon_percent_for_coefficient_of_unalikeability #(max_value - min_value) / 100 * \
+
         length_available_data = len([x for x in column_values_coeff_unalikeability if (x is not None and x != 'None')])  # gv.initial_length_of_data_rows
 
         # very low on performance, not the best implementation
