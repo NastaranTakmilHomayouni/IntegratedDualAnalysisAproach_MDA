@@ -1,0 +1,20 @@
+Collecting nbformat
+  Using cached nbformat-5.1.3-py3-none-any.whl (178 kB)
+Collecting jupyter-core
+  Using cached jupyter_core-4.9.1-py3-none-any.whl (86 kB)
+Collecting jsonschema!=2.5.0,>=2.4
+  Downloading jsonschema-4.3.3-py3-none-any.whl (71 kB)
+Collecting ipython-genutils
+  Using cached ipython_genutils-0.2.0-py2.py3-none-any.whl (26 kB)
+Requirement already satisfied: traitlets>=4.1 in ./venv/lib/python3.7/site-packages (from nbformat) (5.1.1)
+Requirement already satisfied: typing-extensions in ./venv/lib/python3.7/site-packages (from jsonschema!=2.5.0,>=2.4->nbformat) (4.0.0)
+Collecting pyrsistent!=0.17.0,!=0.17.1,!=0.17.2,>=0.14.0
+  Using cached pyrsistent-0.18.0-cp37-cp37m-manylinux1_x86_64.whl (119 kB)
+Requirement already satisfied: importlib-metadata in ./venv/lib/python3.7/site-packages (from jsonschema!=2.5.0,>=2.4->nbformat) (4.8.2)
+Collecting attrs>=17.4.0
+  Downloading attrs-21.4.0-py2.py3-none-any.whl (60 kB)
+Collecting importlib-resources>=1.4.0
+  Using cached importlib_resources-5.4.0-py3-none-any.whl (28 kB)
+Requirement already satisfied: zipp>=3.1.0 in ./venv/lib/python3.7/site-packages (from importlib-resources>=1.4.0->jsonschema!=2.5.0,>=2.4->nbformat) (3.6.0)
+Installing collected packages: pyrsistent, importlib-resources, attrs, jupyter-core, jsonschema, ipython-genutils, nbformat
+Successfully installed attrs-21.4.0 importlib-resources-5.4.0 ipython-genutils-0.2.0 jsonschema-4.3.3 jupyter-core-4.9.1 nbformat-5.1.3 pyrsistent-0.18.0

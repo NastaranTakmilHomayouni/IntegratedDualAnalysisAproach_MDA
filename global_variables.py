@@ -17,7 +17,4 @@ id_data_type__categorical = "string"
 id_data_type__numerical = "number"
 id_data_type__date = "date"
 
-modes_threshold = 0.10
-coefficient_of_unalikeability_threshold = 0.05
-
 request_data_list = []

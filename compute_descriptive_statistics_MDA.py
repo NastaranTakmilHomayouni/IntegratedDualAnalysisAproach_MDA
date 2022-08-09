@@ -86,14 +86,15 @@ def get_categories(column_values):
 
         if str(count_el) != 'nan':
             categories_list.append(
-                CategoriesObject(str(count_el), (counter_elements[count_el] / len(column_values)),
+                CategoriesObject(str(count_el), counter_elements[count_el] / gv.initial_length_of_data_rows,
                                  counter_elements[count_el]))
 
     return categories_list
 
 
 def compute_coefficient_of_unalikeability(column_values_coeff_unalikeability, data_type, column_id):
-    epsilon_percent_for_coefficient_of_unalikeability = gv.coefficient_of_unalikeability_threshold
+    epsilon_percent_for_coefficient_of_unalikeability = 5
+
     sum_unalike = 0
 
     if data_type == id_data_type__categorical:
@@ -114,9 +115,8 @@ def compute_coefficient_of_unalikeability(column_values_coeff_unalikeability, da
         min_value = 0  # numpy.amin(original_column_values)
         max_value = 1  # numpy.amax(original_column_values)
 
-        epsilon = epsilon_percent_for_coefficient_of_unalikeability #(max_value - min_value) / 100 * \
-
-        length_available_data = len([x for x in column_values_coeff_unalikeability if (x is not None and x != 'None')])  # gv.initial_length_of_data_rows
+        epsilon = (max_value - min_value) / 100 * epsilon_percent_for_coefficient_of_unalikeability
+        length_available_data = len(column_values_coeff_unalikeability)  # gv.initial_length_of_data_rows
 
         # very low on performance, not the best implementation
         # better: group the values
@@ -129,9 +129,7 @@ def compute_coefficient_of_unalikeability(column_values_coeff_unalikeability, da
         #
         # sum_unalike += length_available_data * (column_values_length - length_available_data)
 
-        if length_available_data == 0:
-            return 0
-        elif numpy.isnan(min_value):
+        if numpy.isnan(min_value):
             sum_unalike += length_available_data * (len(column_values_coeff_unalikeability) - length_available_data)  # (gv.initial_length_of_data_rows - length_available_data)
 
         elif min_value == max_value:
@@ -147,6 +145,7 @@ def compute_coefficient_of_unalikeability(column_values_coeff_unalikeability, da
             grouped_values = column_values_coeff_unalikeability.groupby(pd.cut(column_values_coeff_unalikeability, numpy.arange(min_value,
                                                                                                                                 max_value,
                                                                                                                                 epsilon))).count().to_frame()
+
             for count in grouped_values[column_values_coeff_unalikeability.name]:
                 if count > 0:
                     length_available_data -= count
@@ -170,7 +169,7 @@ def get_number_of_modes(current_col, data_type, column_id):
 
     elif data_type == id_data_type__categorical:
 
-        threshold = gv.modes_threshold
+        threshold = 0.10
 
         relative_frequencies = [number / gv.initial_length_of_data_rows for number in
                                 list(collections.Counter(cleaned_list).values())]
@@ -197,55 +196,3 @@ def get_number_of_modes(current_col, data_type, column_id):
             maxima = numpy.count_nonzero(numpy.r_[True, e[1:] > e[:-1]] & numpy.r_[e[:-1] > e[1:], True])
 
             return int(maxima)  # len(argrelextrema(kde(bandwidths[1]), numpy.greater)[0])
-
-
-def update_coeff_unalikeability_modes(current_col):
-
-    current_col_without_nan = [current_val for current_val in current_col.descriptive_statistics.normalized_values
-                               if str(current_val) != 'nan']
-
-    column_used = current_col_without_nan
-    if gv.include_missing_values:
-        column_used = current_col.descriptive_statistics.normalized_values
-
-    current_col.descriptive_statistics.coefficient_of_unalikeability = compute_coefficient_of_unalikeability(
-        column_used, current_col.data_type, current_col.id)
-    current_col.descriptive_statistics.number_of_modes = get_number_of_modes(column_used, current_col.data_type,
-                                                                             current_col.id)
-
-    return current_col
-
-
-def update_coeff_unalikeability_modes_dict(current_col):
-
-    current_col_without_nan = [current_val for current_val in current_col['descriptive_statistics']['normalized_values']
-                               if str(current_val) != 'nan']
-
-    column_used = current_col_without_nan
-    if gv.include_missing_values:
-        column_used = current_col['descriptive_statistics']['normalized_values']
-
-    current_col['descriptive_statistics']['coefficient_of_unalikeability'] = compute_coefficient_of_unalikeability(
-        column_used, current_col['data_type'], current_col['id'])
-    current_col['descriptive_statistics']['number_of_modes'] = get_number_of_modes(column_used, current_col['data_type']
-                                                                                   , current_col['id'])
-
-    return current_col
-
-
-def update_coeff_unalikealibiity_modes_deviations(current_col):
-
-    used_data = gv.data_initially_formatted_no_missing_values
-    if gv.include_missing_values:
-        used_data = gv.data_initially_formatted
-
-    whole_data_col = [x for x in used_data if x.id == current_col['id']][0]
-
-    current_col['descriptive_statistics']['coefficient_of_unalikeability_deviation'] = current_col['descriptive_statistics']['coefficient_of_unalikeability'] - whole_data_col.descriptive_statistics.coefficient_of_unalikeability
-    current_col['descriptive_statistics']['number_of_modes_deviation'] = current_col['descriptive_statistics']['number_of_modes'] - whole_data_col.descriptive_statistics.number_of_modes
-
-    current_col['descriptive_statistics']['overall_deviation'] = (abs(
-        current_col['descriptive_statistics']['coefficient_of_unalikeability_deviation']) + abs(
-        current_col['descriptive_statistics']['stDev_deviation']) + abs(
-        current_col['descriptive_statistics']['missing_values_percentage_deviation'])) / 3
-    return current_col
